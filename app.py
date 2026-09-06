@@ -63,7 +63,7 @@ SCENARIOS = {
 }
 
 # -------------------------------------------------------------
-# 3. BENUTZEROBERFLÄCHE
+# 3. BENUTZEROBERFLÄCHE: DEMO-COCKPIT
 # -------------------------------------------------------------
 st.title("⚡ E-Commerce AI Support-Autopilot")
 st.caption("Interaktive Live-Demo: Anfragen in Sekunden analysieren, Shop-Daten abrufen und versandfertige Antworten generieren.")
@@ -157,16 +157,77 @@ with col_right:
     elif not run_button:
         st.info("Wähle links ein Szenario aus und klicke auf 'Anfrage durch AI analysieren', um die Demo zu starten.")
 
-# --- FOOTER / CALL TO ACTION ---
+# -------------------------------------------------------------
+# 4. ROI-RECHNER & CALL TO ACTION
+# -------------------------------------------------------------
+st.markdown("---")
+st.header("📈 Dein Sparpotenzial: Was kostet dich manueller Support wirklich?")
+st.caption("Ermittle in Sekunden, wie viel Zeit und Geld du durch intelligente Support-Automation monatlich zurückholst.")
+
+col_calc1, col_calc2 = st.columns([1, 1], gap="large")
+
+with col_calc1:
+    st.subheader("⚙️ Deine aktuellen Kennzahlen")
+    monthly_tickets = st.slider(
+        "Monatliche Support-Tickets:",
+        min_value=100,
+        max_value=5000,
+        value=600,
+        step=50,
+        help="Typische Anfragen wie 'Wo ist mein Paket?', Stornierungen, Retouren etc."
+    )
+    
+    hourly_wage = st.slider(
+        "Kosten pro Support-Mitarbeiter / Stunde (€):",
+        min_value=15,
+        max_value=60,
+        value=25,
+        step=1,
+        help="Reallohn inkl. Lohnnebenkosten oder dein eigener kalkulatorischer Stundensatz."
+    )
+
+    avg_minutes_per_ticket = 6  # Durchschnittliche Bearbeitungsdauer manuell in Minuten
+    automation_rate = 0.70      # Konservativ geschätzt: 70% der Standardfälle automatisiert
+
+with col_calc2:
+    st.subheader("💰 Dein monatliches Ergebnis")
+    
+    # Berechnungen
+    total_hours_spent = (monthly_tickets * avg_minutes_per_ticket) / 60
+    saved_hours = total_hours_spent * automation_rate
+    current_cost = total_hours_spent * hourly_wage
+    saved_money = saved_hours * hourly_wage
+    
+    m_col1, m_col2 = st.columns(2)
+    with m_col1:
+        st.metric(
+            label="Eingesparte Arbeitszeit",
+            value=f"{int(saved_hours)} Std. / Mo.",
+            delta="Bis zu 70% weniger Routine"
+        )
+    with m_col2:
+        st.metric(
+            label="Monatliche Ersparnis",
+            value=f"{saved_money:,.0f} €".replace(",", "."),
+            delta="Reine Kostenreduktion"
+        )
+        
+    st.success(
+        f"💡 **Fazit:** Du gewinnst pro Jahr ca. **{int(saved_hours * 12)} Stunden** Fokuszeit zurück "
+        f"und senkst deine Betriebskosten um rund **{saved_money * 12:,.0f} €**.".replace(",", ".")
+    )
+
 st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center; padding: 20px;'>
-        <h3>Möchtest du diese Automation für deinen eigenen Shop anbinden?</h3>
-        <p>Spart bis zu 80% der Support-Zeit und antwortet Kunden in Sekundenschnelle rund um die Uhr.</p>
+        <h2>Bereit, diesen Hebel für deinen Shop umzusetzen?</h2>
+        <p style='font-size: 17px; max-width: 650px; margin: 0 auto 20px auto;'>
+            Im kostenlosen 30-minütigen Analyse-Gespräch prüfen wir dein Ticket-Aufkommen und zeigen dir genau, wie die Anbindung an dein System reibungslos funktioniert.
+        </p>
         <a href='https://calendar.app.google/EbQJY6MZbiYNwSEF9' target='_blank'>
-            <button style='background-color: #ff4b4b; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer;'>
-                📅 Jetzt kostenloses Beratungsgespräch anfragen
+            <button style='background-color: #ff4b4b; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 75, 75, 0.4);'>
+                📅 Jetzt kostenloses Beratungsgespräch sichern
             </button>
         </a>
     </div>
