@@ -164,7 +164,7 @@ st.markdown(
     <div style='text-align: center; padding: 20px;'>
         <h3>Möchtest du diese Automation für deinen eigenen Shop anbinden?</h3>
         <p>Spart bis zu 80% der Support-Zeit und antwortet Kunden in Sekundenschnelle rund um die Uhr.</p>
-        <a href='https://calendly.com' target='_blank'>
+        <a href='https://calendar.app.google/EbQJY6MZbiYNwSEF9' target='_blank'>
             <button style='background-color: #ff4b4b; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer;'>
                 📅 Jetzt kostenloses Beratungsgespräch anfragen
             </button>
