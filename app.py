@@ -15,7 +15,7 @@ st.set_page_config(
 tab1, tab2 = st.tabs(["🛒 1. E-Commerce Support-Autopilot", "📱 2. Social Media & Google Autopilot"])
 
 # =============================================================
-# TAB 1: SUPPORT-AGENT & ROI-RECHNER
+# TAB 1: SUPPORT-AGENT & ROI-RECHNER MIT VALUE-BASED PRICING
 # =============================================================
 with tab1:
     MOCK_ORDERS = {
@@ -138,32 +138,60 @@ with tab1:
         elif not run_button:
             st.info("Wähle links ein Szenario aus und klicke auf 'Anfrage durch AI analysieren', um die Demo zu starten.")
 
-    # ROI-Rechner
+    # ---------------------------------------------------------
+    # DYNAMISCHER ROI-RECHNER & VALUE-BASED PRICING
+    # ---------------------------------------------------------
     st.markdown("---")
-    st.header("📈 Dein Sparpotenzial: Was kostet dich manueller Support wirklich?")
-    st.caption("Ermittle in Sekunden, wie viel Zeit und Geld du durch intelligente Support-Automation monatlich zurückholst.")
+    st.header("📈 Dein Sparpotenzial & Value-Based Pricing")
+    st.caption("Ermittle dein Sparpotenzial. Die Investition skaliert transparent mit dem geschaffenen finanziellen Mehrwert.")
 
     col_calc1, col_calc2 = st.columns([1, 1], gap="large")
     with col_calc1:
         st.subheader("⚙️ Deine aktuellen Kennzahlen")
-        monthly_tickets = st.slider("Monatliche Support-Tickets:", 100, 5000, 600, 50)
+        monthly_tickets = st.slider("Monatliche Support-Tickets:", 100, 5000, 750, 50)
         hourly_wage = st.slider("Kosten pro Support-Mitarbeiter / Stunde (€):", 15, 60, 25, 1)
         avg_minutes_per_ticket = 6
         automation_rate = 0.70
 
+        # Dynamische Pricing-Klassifizierung
+        if monthly_tickets <= 600:
+            tier_name = "Starter Shop"
+            setup_fee = 1900
+            monthly_retainer = 450
+        elif monthly_tickets <= 1500:
+            tier_name = "Scale Shop"
+            setup_fee = 3500
+            monthly_retainer = 850
+        else:
+            tier_name = "Enterprise High-Volume"
+            setup_fee = 6500
+            monthly_retainer = 1650
+
     with col_calc2:
-        st.subheader("💰 Dein monatliches Ergebnis")
+        st.subheader("💰 Dein monatlicher Return on Investment")
         total_hours_spent = (monthly_tickets * avg_minutes_per_ticket) / 60
         saved_hours = total_hours_spent * automation_rate
         saved_money = saved_hours * hourly_wage
+        net_monthly_profit = saved_money - monthly_retainer
         
         m_col1, m_col2 = st.columns(2)
         with m_col1:
-            st.metric(label="Eingesparte Arbeitszeit", value=f"{int(saved_hours)} Std. / Mo.", delta="Bis zu 70% weniger Routine")
+            st.metric(label="Eingesparte Arbeitszeit", value=f"{int(saved_hours)} Std. / Mo.", delta="Bis zu 70% Routine-Wegfall")
         with m_col2:
-            st.metric(label="Monatliche Ersparnis", value=f"{saved_money:,.0f} €".replace(",", "."), delta="Reine Kostenreduktion")
+            st.metric(label="Monatliche Kostenersparnis", value=f"{saved_money:,.0f} €".replace(",", "."), delta="Eingespartes Gehalt")
             
-        st.success(f"💡 **Fazit:** Du gewinnst pro Jahr ca. **{int(saved_hours * 12)} Stunden** Fokuszeit zurück und senkst deine Betriebskosten um rund **{saved_money * 12:,.0f} €**.".replace(",", "."))
+        st.markdown(f"#### 🏷️ Passendes Paket: **{tier_name}**")
+        p_col1, p_col2 = st.columns(2)
+        with p_col1:
+            st.markdown(f"**Einmalige Setup-Gebühr:** `{setup_fee:,.0f} €`".replace(",", "."))
+        with p_col2:
+            st.markdown(f"**Monatlicher Betreuungs-Retainer:** `{monthly_retainer:,.0f} €`".replace(",", "."))
+            
+        st.success(
+            f"🚀 **Dein monatlicher Netto-Vorteil:** Nach Abzug unseres Betreuungs-Retainers verbleibt deinem Shop "
+            f"ein reiner Monatsgewinn von ca. **{net_monthly_profit:,.0f} €** "
+            f"(bzw. **{net_monthly_profit * 12:,.0f} € pro Jahr**)!".replace(",", ".")
+        )
 
     st.markdown("---")
     st.markdown(
