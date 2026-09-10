@@ -1,6 +1,7 @@
 import streamlit as st
 import re
 import json
+import requests
 
 # Seiteneinstellungen
 st.set_page_config(
@@ -138,9 +139,7 @@ with tab1:
         elif not run_button:
             st.info("Wähle links ein Szenario aus und klicke auf 'Anfrage durch AI analysieren', um die Demo zu starten.")
 
-    # ---------------------------------------------------------
-    # DYNAMISCHER ROI-RECHNER & VALUE-BASED PRICING
-    # ---------------------------------------------------------
+    # DYNAMISCHER ROI-RECHNER
     st.markdown("---")
     st.header("📈 Dein Sparpotenzial & Value-Based Pricing")
     st.caption("Ermittle dein Sparpotenzial. Die Investition skaliert transparent mit dem geschaffenen finanziellen Mehrwert.")
@@ -153,7 +152,6 @@ with tab1:
         avg_minutes_per_ticket = 6
         automation_rate = 0.70
 
-        # Dynamische Pricing-Klassifizierung
         if monthly_tickets <= 600:
             tier_name = "Starter Shop"
             setup_fee = 1900
@@ -263,56 +261,79 @@ with tab2:
         st.subheader("🚀 2. Fertige Posts & Auto-Publishing")
 
         if generate_sm_btn and sm_raw_input.strip():
-            with st.spinner("AI optimiert Tonalität für jeden Kanal..."):
+            st.session_state["google_text"] = (
+                f"🔨 Frisches Update direkt aus unserer Werkstatt!\n\n"
+                f"{sm_raw_input.strip()}\n\n"
+                f"👉 Suchst auch du nach zuverlässiger Qualität in der Region? "
+                f"Kontaktiere uns direkt über unser Profil oder besuche unsere Website für ein unverbindliches Angebot!"
+            ) if post_to_google else ""
+
+            st.session_state["insta_text"] = (
+                f"Details machen den Unterschied! ✨\n\n"
+                f"{sm_raw_input.strip()}\n\n"
+                f"Wie gefällt euch das Ergebnis? Lasst es uns in den Kommentaren wissen! 👇\n\n"
+                f"───────────────────\n"
+                f"#handwerk #qualität #vorhernachher #lokalstark #meisterbetrieb #kundenbegeisterung"
+            ) if post_to_instagram else ""
+
+            st.session_state["linkedin_text"] = (
+                f"Gute Arbeit spricht für sich – aber Prozesse machen den Unterschied.\n\n"
+                f"Aktuelles Praxisbeispiel:\n"
+                f"{sm_raw_input.strip()}\n\n"
+                f"Was wir daraus mitnehmen: Klare Kommunikation und verlässliche Absprachen sind die halbe Miete für erfolgreiche Projekte.\n\n"
+                f"Welche Erfahrungen habt ihr zuletzt in ähnlichen Projekten gemacht?"
+            ) if post_to_linkedin else ""
+
+            st.session_state["has_content"] = True
+
+        if st.session_state.get("has_content", False):
+            if post_to_google:
+                st.markdown("#### 📍 Google Business Beitrag")
+                st.session_state["google_text"] = st.text_area("Google Text:", value=st.session_state.get("google_text", ""), height=120)
+
+            if post_to_instagram:
+                st.markdown("#### 📸 Instagram & Facebook Caption")
+                st.session_state["insta_text"] = st.text_area("Instagram Caption:", value=st.session_state.get("insta_text", ""), height=140)
+
+            if post_to_linkedin:
+                st.markdown("#### 💼 LinkedIn Beitrag")
+                st.session_state["linkedin_text"] = st.text_area("LinkedIn Text:", value=st.session_state.get("linkedin_text", ""), height=130)
+
+            st.markdown("---")
+            st.markdown("##### ⚡ Auto-Poster Live-Schnittstelle")
+            
+            webhook_url = st.text_input(
+                "Make.com Webhook-URL:",
+                value="https://hook.eu1.make.com/lf0zta84pc7p0tfcwj656x79xntsv1sf",
+                help="Deine hinterlegte Live-Webhook-URL von Make.com."
+            )
+
+            publish_btn = st.button("📤 Jetzt via Webhook an Social-Media senden", type="primary", use_container_width=True)
+            
+            if publish_btn:
+                payload = {
+                    "source": "Streamlit Social Autopilot",
+                    "business_type": business_type,
+                    "platforms": {
+                        "google_business": st.session_state.get("google_text", "") if post_to_google else None,
+                        "instagram": st.session_state.get("insta_text", "") if post_to_instagram else None,
+                        "linkedin": st.session_state.get("linkedin_text", "") if post_to_linkedin else None
+                    }
+                }
                 
-                # Google Post Generierung
-                if post_to_google:
-                    st.markdown("#### 📍 Google Business Beitrag (Maps-Ranking Booster)")
-                    google_post = (
-                        f"🔨 Frisches Update direkt aus unserer Werkstatt!\n\n"
-                        f"{sm_raw_input.strip()}\n\n"
-                        f"👉 Suchst auch du nach zuverlässiger Qualität in der Region? "
-                        f"Kontaktiere uns direkt über unser Profil oder besuche unsere Website für ein unverbindliches Angebot!"
-                    )
-                    st.text_area("Google Business Text:", value=google_post, height=130)
-
-                # Instagram Post Generierung
-                if post_to_instagram:
-                    st.markdown("#### 📸 Instagram & Facebook Caption")
-                    insta_post = (
-                        f"Details machen den Unterschied! ✨\n\n"
-                        f"{sm_raw_input.strip()}\n\n"
-                        f"Wie gefällt euch das Ergebnis? Lasst es uns in den Kommentaren wissen! 👇\n\n"
-                        f"───────────────────\n"
-                        f"#handwerk #qualität #vorhernachher #lokalstark #meisterbetrieb #kundenbegeisterung"
-                    )
-                    st.text_area("Instagram/Facebook Caption:", value=insta_post, height=150)
-
-                # LinkedIn Post Generierung
-                if post_to_linkedin:
-                    st.markdown("#### 💼 LinkedIn Beitrag (B2B & Reputation)")
-                    linkedin_post = (
-                        f"Gute Arbeit spricht für sich – aber Prozesse machen den Unterschied.\n\n"
-                        f"Aktuelles Praxisbeispiel:\n"
-                        f"{sm_raw_input.strip()}\n\n"
-                        f"Was wir daraus mitnehmen: Klare Kommunikation und verlässliche Absprachen sind die halbe Miete für erfolgreiche Projekte.\n\n"
-                        f"Welche Erfahrungen habt ihr zuletzt in ähnlichen Projekten gemacht?"
-                    )
-                    st.text_area("LinkedIn Text:", value=linkedin_post, height=140)
-
-                st.markdown("---")
-                # Auto-Posting Trigger (Simulation für Make / n8n Webhook)
-                st.markdown("##### ⚡ Auto-Poster Schnittstelle")
-                st.caption("Ein Klick übergibt den Content an n8n / Make.com und postet direkt via Social-Media-APIs:")
-                
-                publish_btn = st.button("📤 Jetzt zeitgesteuert auf allen Kanälen veröffentlichen", use_container_width=True)
-                if publish_btn:
-                    st.success("✅ Webhook ausgelöst! Beiträge wurden an n8n übergeben und für die optimalen Veröffentlichungszeiten eingereiht.")
-
-        elif not generate_sm_btn:
+                try:
+                    with st.spinner("Sende Daten an Make.com..."):
+                        response = requests.post(webhook_url, json=payload, timeout=5)
+                        if response.status_code in [200, 201]:
+                            st.success(f"✅ Erfolgreich übertragen! (HTTP {response.status_code}) – Daten sind in Make.com eingetroffen.")
+                        else:
+                            st.warning(f"⚠️ Webhook hat geantwortet mit Status-Code: {response.status_code}.")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Verbindungsfehler: {e}")
+        else:
             st.info("Wähle links eine Vorlage oder tippe eigene Stichpunkte ein und klicke auf 'Posts für alle Kanäle generieren'.")
 
-    # CTA auch im Tab 2
+    # CTA
     st.markdown("---")
     st.markdown(
         """
